@@ -1,7 +1,7 @@
 // ---- Supabase 接続設定 ----
 // Supabase ダッシュボード > Project Settings > API から取得して置き換えてください
-const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const SUPABASE_URL = 'https://njnblmhsmxresbawnuiw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_sqR7L391kUFfobAVrJv4fg_7pwi6sRF';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -46,19 +46,33 @@ document.addEventListener('DOMContentLoaded', () => {
     feedbackSubmitBtn.disabled = true;
     feedbackNote.textContent = '送信中です…';
 
-    const { error } = await sb.from('feedback').insert([
-      { name, email: email || null, rating, comment },
-    ]);
+    try {
+      const payload = { name, email: email || null, rating, comment };
+      console.log('[feedback] sending payload:', payload);
 
-    feedbackSubmitBtn.disabled = false;
+      const { data, error, status, statusText } = await sb
+        .from('feedback')
+        .insert([payload])
+        .select();
 
-    if (error) {
-      console.error('feedback insert error:', error);
-      feedbackNote.textContent = '送信に失敗しました。時間をおいて再度お試しください。';
-      return;
+      console.log('[feedback] response:', { data, error, status, statusText });
+
+      if (error) {
+        console.error('[feedback] insert error message:', error.message);
+        console.error('[feedback] insert error code:', error.code);
+        console.error('[feedback] insert error details:', error.details);
+        console.error('[feedback] insert error hint:', error.hint);
+        feedbackNote.textContent = `送信に失敗しました。(${error.code ?? 'unknown'}: ${error.message ?? '原因不明'})`;
+        return;
+      }
+
+      feedbackNote.textContent = 'ご意見ありがとうございました。今後のサイト改善に活用させていただきます。';
+      feedbackForm.reset();
+    } catch (err) {
+      console.error('[feedback] unexpected exception:', err);
+      feedbackNote.textContent = `送信に失敗しました。(例外: ${err.message ?? err}）`;
+    } finally {
+      feedbackSubmitBtn.disabled = false;
     }
-
-    feedbackNote.textContent = 'ご意見ありがとうございました。今後のサイト改善に活用させていただきます。';
-    feedbackForm.reset();
   });
 });
