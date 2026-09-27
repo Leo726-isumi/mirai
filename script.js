@@ -22,4 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     note.textContent = 'お問い合わせありがとうございます。内容を確認のうえ、事務局よりご連絡いたします。';
     form.reset();
   });
+
+  const feedbackForm = document.getElementById('feedbackForm');
+  const feedbackNote = document.getElementById('fbFormNote');
+
+  feedbackForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    feedbackNote.textContent = 'ご意見ありがとうございました。今後のサイト改善に活用させていただきます。';
+    feedbackForm.reset();
+  });
 });
